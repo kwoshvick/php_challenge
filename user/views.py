@@ -1,8 +1,14 @@
+import csv
+import pandas as pd
+
 from django.db.models import Q
 from django.utils.dateparse import parse_date
-from rest_framework import generics
+from rest_framework import generics, status
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from .models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, FileUploadSerializer
 
 
 class UserList(generics.ListCreateAPIView):
@@ -42,3 +48,28 @@ class UserList(generics.ListCreateAPIView):
             queryset = queryset.order_by(sort_by)
 
         return queryset
+
+
+class UserUploadAPIView(generics.CreateAPIView):
+    serializer_class = FileUploadSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        file = serializer.validated_data["file"]
+        reader = pd.read_csv(file)
+        for _, row in reader.iterrows():
+            print(row)
+            new_file = User(
+                first_name=row["first_name"],
+                last_name=row["last_name"],
+                national_id=row["national_id"],
+                birth_date=row["birth_date"],
+                address=row["address"],
+                country=row["country"],
+                phone_number=row["phone_number"],
+                email=row["email"],
+                finger_print_signature=row["finger_print_signature"],
+            )
+            new_file.save()
+        return Response({"status": "success"}, status.HTTP_201_CREATED)

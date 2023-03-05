@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import User
+from django.utils.translation import gettext_lazy as _
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,3 +18,15 @@ class UserSerializer(serializers.ModelSerializer):
             "email",
             "finger_print_signature",
         ]
+
+
+class FileUploadSerializer(serializers.Serializer):
+    file = serializers.FileField()
+
+    def validate(self, attrs):
+        file = attrs.get("file")
+        if not file:
+            raise serializers.ValidationError(_("No file uploaded."))
+        if not file.name.endswith(".csv"):
+            raise serializers.ValidationError(_("Invalid file format."))
+        return attrs

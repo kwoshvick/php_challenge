@@ -16,3 +16,8 @@ class User(models.Model):
 
     def __str__(self):
         return f"{self.first_name} - {self.last_name}"
+
+
+class UserCsvFile(models.Model):
+    file = models.FileField(blank=False, null=False, upload_to="csv/")
+    uploaded_at = models.DateTimeField(auto_now_add=True)
