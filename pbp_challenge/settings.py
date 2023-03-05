@@ -37,10 +37,10 @@ else:
         "ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")]
     )
 
-# if (config('ENV') == "PRODUCTION") or (config('ENV') == "STAGING"):
-#     CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS",
-#                            cast=lambda v: [s.strip() for s in v.split(",")]
-#                            )
+if (config("ENV") == "PRODUCTION") or (config("ENV") == "STAGING"):
+    CSRF_TRUSTED_ORIGINS = config(
+        "CSRF_TRUSTED_ORIGINS", cast=lambda v: [s.strip() for s in v.split(",")]
+    )
 
 
 # Application definition
@@ -152,8 +152,7 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
