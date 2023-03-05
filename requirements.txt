@@ -1,0 +1,19 @@
+django-cors-headers==3.14.0
+    Django==4.1.7
+        asgiref==3.6.0
+        sqlparse==0.4.3
+gevent==22.10.2
+    greenlet==2.0.2
+    # setuptools
+    zope.event==4.6
+        # setuptools
+    zope.interface==5.5.2
+        # setuptools
+gunicorn==20.1.0
+    # setuptools
+pipfreeze==2.0.3
+psycopg2-binary==2.9.5
+python-decouple==3.8
+redis==4.5.1
+    async-timeout==4.0.2
+whitenoise==6.4.0

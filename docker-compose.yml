@@ -1,0 +1,56 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    image: app
+    container_name: pbp_challenge_backend_django
+    restart: unless-stopped
+    command: ./wait-for-it.sh db:5432 -- gunicorn pbp_challenge.wsgi:application --workers 16 --timeout 150 --worker-class gevent --bind 0.0.0.0:8000
+    env_file:
+      - ./.env.staging
+    depends_on:
+      - db
+    volumes:
+      - .:/pbp_challenge_backend_db
+      - static_volume:/app/static
+    networks:
+      -  pbp_challenge_backend_network
+
+  nginx:
+    image: nginx:latest
+    container_name: pbp_challenge_backend_nginx
+    restart: unless-stopped
+    ports:
+      - "4020:80"
+    depends_on:
+      - app
+    volumes:
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+      - static_volume:/app/static
+    networks:
+      - pbp_challenge_backend_network
+
+  db:
+    image: postgres:12
+    container_name: pbp_challenge_backend_db
+    restart: on-failure
+    environment:
+      - POSTGRES_DB=pbp_challenge_db
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=306d33acef676892be36fbb46ca63f66
+    ports:
+      - "5434:5432"
+    volumes:
+      - pbp_challenge_database_volume:/var/lib/postgresql/data
+    networks:
+      - pbp_challenge_backend_network
+
+
+networks:
+  pbp_challenge_backend_network:
+    driver: bridge
+
+volumes:
+  static_volume:
+  pbp_challenge_database_volume:
