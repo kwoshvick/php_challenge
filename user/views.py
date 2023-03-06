@@ -1,7 +1,5 @@
-import csv
-from datetime import datetime
 import pandas as pd
-
+from datetime import datetime
 from django.db.models import Q
 from django.utils.dateparse import parse_date
 from rest_framework import generics, status
@@ -13,7 +11,6 @@ from .models import User, UserCsvFile
 from .tasks import process_user_csv
 from .serializers import (
     UserSerializer,
-    FileUploadSerializer,
     FileSerializer,
     UserCsvFileSerializer,
 )
@@ -27,7 +24,7 @@ class UserList(generics.ListCreateAPIView):
         queryset = super().get_queryset()
 
         # Search by first_name or last_name
-        search_query = self.request.query_params.get("search", "")
+        search_query = self.request.query_params.get("name", "")
         if search_query:
             queryset = queryset.filter(
                 Q(first_name__icontains=search_query)
@@ -45,10 +42,13 @@ class UserList(generics.ListCreateAPIView):
         # Search by phone_number or email
         phone_number = self.request.query_params.get("phone_number")
         email = self.request.query_params.get("email")
+        national_id = self.request.query_params.get("national_id")
         if phone_number:
             queryset = queryset.filter(phone_number__icontains=phone_number)
         if email:
             queryset = queryset.filter(email__icontains=email)
+        if national_id:
+            queryset = queryset.filter(national_id__icontains=national_id)
 
         # Sort by any field
         sort_by = self.request.query_params.get("sort_by", "id")
@@ -58,38 +58,12 @@ class UserList(generics.ListCreateAPIView):
         return queryset
 
 
-class UserUploadAPIView(generics.CreateAPIView):
-    serializer_class = FileUploadSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        file = serializer.validated_data["file"]
-        reader = pd.read_csv(file)
-        for _, row in reader.iterrows():
-            print(row)
-            new_file = User(
-                first_name=row["first_name"],
-                last_name=row["last_name"],
-                national_id=row["national_id"],
-                birth_date=row["birth_date"],
-                address=row["address"],
-                country=row["country"],
-                phone_number=row["phone_number"],
-                email=row["email"],
-                finger_print_signature=row["finger_print_signature"],
-            )
-            new_file.save()
-        return Response({"status": "success"}, status.HTTP_201_CREATED)
-
-
 class FileUploadView(APIView):
     parser_classes = [MultiPartParser]
 
     def post(self, request):
         serializer = FileSerializer(data=request.data)
         if serializer.is_valid():
-            # Get the file from the serializer
             file_obj = serializer.validated_data["file"]
             timestamp = str(datetime.now().timestamp()).replace(".", "-")
             name = timestamp + "-" + file_obj.name
