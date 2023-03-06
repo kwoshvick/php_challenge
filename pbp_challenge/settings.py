@@ -37,10 +37,10 @@ else:
         "ALLOWED_HOSTS", cast=lambda v: [s.strip() for s in v.split(",")]
     )
 
-# if (config('ENV') == "PRODUCTION") or (config('ENV') == "STAGING"):
-#     CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS",
-#                            cast=lambda v: [s.strip() for s in v.split(",")]
-#                            )
+if (config("ENV") == "PRODUCTION") or (config("ENV") == "STAGING"):
+    CSRF_TRUSTED_ORIGINS = config(
+        "CSRF_TRUSTED_ORIGINS", cast=lambda v: [s.strip() for s in v.split(",")]
+    )
 
 
 # Application definition
@@ -54,6 +54,9 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # 3rd party
     "corsheaders",
+    "rest_framework",
+    # app
+    "user",
 ]
 
 MIDDLEWARE = [
@@ -135,6 +138,12 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+REST_FRAMEWORK = {
+    "DEFAULT_SCHEMA_CLASS": "rest_framework.schemas.coreapi.AutoSchema",
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
+    "PAGE_SIZE": 100,
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
@@ -152,10 +161,22 @@ USE_TZ = True
 
 STATIC_URL = "/static/"
 STATIC_DIR = os.path.join(BASE_DIR, "static")
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+# celery
+BROKER_URL = config("BROKER_URL", default="redis://localhost:6379/8")
+CELERY_BROKER_URL = config("CELERY_BROKER_URL", default="redis://localhost:6379/8")
+CELERY_RESULT_BACKEND = config(
+    "CELERY_RESULT_BACKEND", default="redis://localhost:6379/9"
+)
+
+CELERY_ACCEPT_CONTENT = ["application/json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Africa/Nairobi"

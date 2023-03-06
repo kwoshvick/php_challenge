@@ -3,7 +3,7 @@ version: '3'
 services:
   app:
     build: .
-    image: app
+    image: &app app
     container_name: pbp_challenge_backend_django
     restart: unless-stopped
     command: ./wait-for-it.sh db:5432 -- gunicorn pbp_challenge.wsgi:application --workers 16 --timeout 150 --worker-class gevent --bind 0.0.0.0:8000
@@ -14,6 +14,7 @@ services:
     volumes:
       - .:/pbp_challenge_backend_db
       - static_volume:/app/static
+      - csv_volume:/app/csv
     networks:
       -  pbp_challenge_backend_network
 
@@ -46,6 +47,31 @@ services:
     networks:
       - pbp_challenge_backend_network
 
+  redis:
+    image: redis
+    container_name: pbp_challenge_backend_redis
+    restart: on-failure
+    ports:
+      - "6380:6379"
+    networks:
+      - pbp_challenge_backend_network
+
+  celery:
+    image: *app
+    container_name: pbp_challenge_backend_celery
+    restart: on-failure
+    command: ./wait-for-it.sh redis:6380 -- celery -A pbp_challenge worker -l info
+    env_file:
+      - ./.env.staging
+    depends_on:
+      - app
+      - redis
+    volumes:
+      - .:/celery_volume
+      - csv_volume:/app/csv
+    networks:
+      - pbp_challenge_backend_network
+
 
 networks:
   pbp_challenge_backend_network:
@@ -53,4 +79,6 @@ networks:
 
 volumes:
   static_volume:
+  celery_volume:
+  csv_volume:
   pbp_challenge_database_volume:
