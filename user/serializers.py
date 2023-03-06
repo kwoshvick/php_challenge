@@ -26,18 +26,6 @@ class UserCsvFileSerializer(serializers.ModelSerializer):
         fields = ["id", "state", "name", "original_name", "created_at", "updated_at"]
 
 
-class FileUploadSerializer(serializers.Serializer):
-    file = serializers.FileField()
-
-    def validate(self, attrs):
-        file = attrs.get("file")
-        if not file:
-            raise serializers.ValidationError(_("No file uploaded."))
-        if not file.name.endswith(".csv"):
-            raise serializers.ValidationError(_("Invalid file format."))
-        return attrs
-
-
 class FileSerializer(serializers.Serializer):
     file = serializers.FileField()
 
@@ -47,7 +35,7 @@ class FileSerializer(serializers.Serializer):
     def validate(self, attrs):
         file = attrs.get("file")
         if not file:
-            raise serializers.ValidationError(_("No file uploaded."))
+            raise serializers.ValidationError("No file uploaded.")
         if not file.name.endswith(".csv"):
-            raise serializers.ValidationError(_("Invalid file format."))
+            raise serializers.ValidationError("Invalid file format.")
         return attrs

@@ -1,4 +1,3 @@
-import pandas as pd
 from datetime import datetime
 from django.db.models import Q
 from django.utils.dateparse import parse_date
@@ -12,7 +11,6 @@ from .tasks import process_user_csv
 from .serializers import (
     UserSerializer,
     FileSerializer,
-    UserCsvFileSerializer,
 )
 
 
@@ -79,13 +77,3 @@ class FileUploadView(APIView):
             return Response({"status": "success"})
         else:
             return Response(serializer.errors, status=400)
-
-
-class FileUploadViewing(APIView):
-    serializer = UserCsvFileSerializer
-
-    def get(self, request):
-        # print(UserCsvFile.objects.get())
-
-        # return Response({"status": UserCsvFile})
-        return Response({"status": User.objects.count()})
