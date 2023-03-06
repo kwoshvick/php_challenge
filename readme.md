@@ -32,3 +32,12 @@ API must take the following fields as input:
 - `http://localhost:4020/admin`
     - *username:* admin
     - *password:* gateway
+- Admin panel is used to view state changes in files
+
+## Finite State Machine 
+- States available   
+    - uploading
+    - pending
+    - inserting
+    - processed
+    - failed
