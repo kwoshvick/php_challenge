@@ -38,7 +38,7 @@ class PersonSerializerTest(TestCase):
 
     def test_count_person_serializer_field(self):
         serializer = UserSerializer(instance=self.user)
-        self.assertEqual(10, len(serializer.fields.keys()))
+        self.assertEqual(12, len(serializer.fields.keys()))
 
 
 class UserCsvFileSerializerTest(TestCase):

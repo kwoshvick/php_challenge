@@ -17,6 +17,8 @@ class UserSerializer(serializers.ModelSerializer):
             "phone_number",
             "email",
             "finger_print_signature",
+            "created_at",
+            "updated_at",
         ]
 
 
