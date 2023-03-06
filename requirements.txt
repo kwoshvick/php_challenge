@@ -28,6 +28,7 @@ django-cors-headers==3.14.0
     Django==4.1.7
         asgiref==3.6.0
         sqlparse==0.4.3
+django-fsm==2.8.1
 djangorestframework==3.14.0
     # Django==4.1.7
         # asgiref==3.6.0

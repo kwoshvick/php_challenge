@@ -9,9 +9,14 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 
-from .models import User
+from .models import User, UserCsvFile
 from .tasks import process_user_csv
-from .serializers import UserSerializer, FileUploadSerializer, FileSerializer
+from .serializers import (
+    UserSerializer,
+    FileUploadSerializer,
+    FileSerializer,
+    UserCsvFileSerializer,
+)
 
 
 class UserList(generics.ListCreateAPIView):
@@ -81,21 +86,21 @@ class UserUploadAPIView(generics.CreateAPIView):
 class FileUploadView(APIView):
     parser_classes = [MultiPartParser]
 
-    def post(self, request, format=None):
+    def post(self, request):
         serializer = FileSerializer(data=request.data)
         if serializer.is_valid():
             # Get the file from the serializer
             file_obj = serializer.validated_data["file"]
             timestamp = str(datetime.now().timestamp()).replace(".", "-")
-            destination = open("csv/" + timestamp + "-" + file_obj.name, "wb+")
-            print(destination)
+            name = timestamp + "-" + file_obj.name
+            file = UserCsvFile.objects.create(name=name, original_name=file_obj.name)
+            destination = open("csv/" + name, "wb+")
             for chunk in file_obj.chunks():
                 destination.write(chunk)
             destination.close()
-
-            print("Finished--Copying")
-
-            process_user_csv.delay("csv/" + timestamp + "-" + file_obj.name)
+            file.to_state_pending()
+            file.save()
+            process_user_csv.delay(file.id, "csv/" + name)
 
             return Response({"status": "success"})
         else:
@@ -103,6 +108,10 @@ class FileUploadView(APIView):
 
 
 class FileUploadViewing(APIView):
-    def get(self, request):
+    serializer = UserCsvFileSerializer
 
+    def get(self, request):
+        # print(UserCsvFile.objects.get())
+
+        # return Response({"status": UserCsvFile})
         return Response({"status": User.objects.count()})
