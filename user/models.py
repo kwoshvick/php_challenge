@@ -19,5 +19,9 @@ class User(models.Model):
 
 
 class UserCsvFile(models.Model):
-    file = models.FileField(blank=False, null=False, upload_to="csv/")
-    uploaded_at = models.DateTimeField(auto_now_add=True)
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=50, null=False, blank=False)
+    original_name = models.CharField(max_length=50, null=False, blank=False)
+    # file = models.FileField(blank=False, null=False, upload_to="csv/")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now_add=True)

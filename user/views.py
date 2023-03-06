@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 import pandas as pd
 
 from django.db.models import Q
@@ -6,9 +7,11 @@ from django.utils.dateparse import parse_date
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import MultiPartParser
 
 from .models import User
-from .serializers import UserSerializer, FileUploadSerializer
+from .tasks import process_user_csv
+from .serializers import UserSerializer, FileUploadSerializer, FileSerializer
 
 
 class UserList(generics.ListCreateAPIView):
@@ -73,3 +76,34 @@ class UserUploadAPIView(generics.CreateAPIView):
             )
             new_file.save()
         return Response({"status": "success"}, status.HTTP_201_CREATED)
+
+
+class FileUploadView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, format=None):
+        serializer = FileSerializer(data=request.data)
+        if serializer.is_valid():
+            # Get the file from the serializer
+            file_obj = serializer.validated_data["file"]
+            timestamp = str(datetime.now().timestamp()).replace(".", "-")
+            destination = open("csv/" + timestamp + "-" + file_obj.name, "wb+")
+            print(destination)
+            for chunk in file_obj.chunks():
+                destination.write(chunk)
+            destination.close()
+
+            print("Finished--Copying")
+
+            process_user_csv.delay("csv/" + timestamp + "-" + file_obj.name)
+
+            return Response({"status": "success"})
+        else:
+            return Response(serializer.errors, status=400)
+
+
+class FileUploadViewing(APIView):
+    def get(self, request, format=None):
+
+        return Response({"status": User.objects.count()})
+        # return Response({'status': 'success'})
