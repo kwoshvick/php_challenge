@@ -12,10 +12,6 @@ logger = get_task_logger(__name__)
 def process_user_csv(path):
     for chunk in pd.read_csv(path, chunksize=1000):
         data = chunk.to_dict(orient="records")
-        User.objects.bulk_create(
-            [User(**row) for row in data],
-            # batch_size=10000
-        )
+        User.objects.bulk_create([User(**row) for row in data], batch_size=10000)
         print("Batch inserted----------------------------------")
-
-    print("Done -----")
+    print("Done ----- Inserting")

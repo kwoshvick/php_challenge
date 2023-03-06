@@ -103,7 +103,6 @@ class FileUploadView(APIView):
 
 
 class FileUploadViewing(APIView):
-    def get(self, request, format=None):
+    def get(self, request):
 
         return Response({"status": User.objects.count()})
-        # return Response({'status': 'success'})
