@@ -29,13 +29,6 @@ class UserCsvFileTest(TestCase):
             original_name="gg.csv",
         )
 
-    # @classmethod
-    # def setUp(self):
-    #     self.file = UserCsvFile.objects.create(
-    #         name="234fg-gg.csv",
-    #         original_name="gg.csv",
-    #     )
-
     def test_user_csv_file_count(self):
         self.assertEqual(1, UserCsvFile.objects.count())
 
