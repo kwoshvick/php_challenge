@@ -11,6 +11,7 @@ from .tasks import process_user_csv
 from .serializers import (
     UserSerializer,
     FileSerializer,
+    UserCsvFileSerializer,
 )
 
 
@@ -77,3 +78,8 @@ class FileUploadView(APIView):
             return Response({"status": "success"})
         else:
             return Response(serializer.errors, status=400)
+
+
+class FileListView(generics.ListAPIView):
+    serializer_class = UserCsvFileSerializer
+    queryset = UserCsvFile.objects.all()
