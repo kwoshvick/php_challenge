@@ -67,13 +67,13 @@ class FileUploadView(APIView):
             timestamp = str(datetime.now().timestamp()).replace(".", "-")
             name = timestamp + "-" + file_obj.name
             file = UserCsvFile.objects.create(name=name, original_name=file_obj.name)
-            destination = open("csv/" + name, "wb+")
+            destination = open("media/csv/" + name, "wb+")
             for chunk in file_obj.chunks():
                 destination.write(chunk)
             destination.close()
             file.to_state_pending()
             file.save()
-            process_user_csv.delay(file.id, "csv/" + name)
+            process_user_csv.delay(file.id, "media/csv/" + name)
 
             return Response({"status": "success"})
         else:

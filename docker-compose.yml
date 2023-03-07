@@ -14,7 +14,7 @@ services:
     volumes:
       - .:/pbp_challenge_backend_db
       - static_volume:/app/static
-      - csv_volume:/app/csv
+      - csv_volume:/app/media/csv
     networks:
       -  pbp_challenge_backend_network
 
@@ -68,7 +68,7 @@ services:
       - redis
     volumes:
       - .:/celery_volume
-      - csv_volume:/app/csv
+      - csv_volume:/app/media/csv
     networks:
       - pbp_challenge_backend_network
 
