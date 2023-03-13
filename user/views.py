@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 
+from pbp_challenge import settings
 from .models import User, UserCsvFile
 from .serializers import (
     UserSerializer,
@@ -66,12 +67,18 @@ class FileUploadView(APIView):
             timestamp = str(datetime.now().timestamp()).replace(".", "-")
             name = timestamp + "-" + file_obj.name
             file = UserCsvFile.objects.create(name=name, original_name=file_obj.name)
-            destination = open("media/csv/" + name, "wb+")
-            for chunk in file_obj.chunks():
-                destination.write(chunk)
-            destination.close()
-            file.to_state_pending()
-            file.save()
+            try:
+                destination = open(settings.MEDIA_ROOT + name, "wb+")
+                for chunk in file_obj.chunks():
+                    destination.write(chunk)
+                destination.close()
+                file.to_state_pending()
+                file.save()
+            except Exception as e:
+                file.to_state_failed_from_uploading()
+                file.save()
+                print("Exception", e)
+                return Response({"status": "failed"}, status=400)
 
             return Response({"status": "success"})
         else:
