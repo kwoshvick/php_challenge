@@ -7,7 +7,6 @@ from rest_framework.views import APIView
 from rest_framework.parsers import MultiPartParser
 
 from .models import User, UserCsvFile
-from .tasks import process_user_csv
 from .serializers import (
     UserSerializer,
     FileSerializer,
@@ -73,7 +72,6 @@ class FileUploadView(APIView):
             destination.close()
             file.to_state_pending()
             file.save()
-            process_user_csv.delay(file.id, "media/csv/" + name)
 
             return Response({"status": "success"})
         else:
